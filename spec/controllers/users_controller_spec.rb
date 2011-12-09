@@ -306,8 +306,8 @@ describe UsersController do
     describe "as an admin user" do
 
       before(:each) do
-        admin = Factory(:user, :email => "admin@example.com", :admin => true)
-        test_sign_in(admin)
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(@admin)
         User.should_receive(:find).with(@user).and_return(@user)
         @user.should_receive(:destroy).and_return(@user)
       end
@@ -316,6 +316,14 @@ describe UsersController do
         delete :destroy, :id => @user
         response.should redirect_to(users_path)
       end
+
+      it "should not destroy itself" do
+        @user.toggle!(:admin)
+        delete :destroy, :id => @user
+        @user.should_not_receive(:destroy).and_return(false)
+        response.should redirect_to(users_path)
+      end
+
     end
   end
 end
